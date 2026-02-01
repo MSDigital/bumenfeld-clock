@@ -6,6 +6,7 @@ import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
+import com.buuz135.mhud.MultipleHUD;
 import com.hypixel.hytale.server.core.entity.EntityUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.HudManager;
@@ -19,6 +20,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public final class ClockTickSystem extends EntityTickingSystem<EntityStore> {
+
+    private static final String HUD_KEY = "BumenfeldClock";
 
     private final Query<EntityStore> query;
     private final Config<ClockConfig> config;
@@ -73,7 +76,12 @@ public final class ClockTickSystem extends EntityTickingSystem<EntityStore> {
         if (settings.getLastRenderedPosition() != settings.getPosition()
             || !settings.getLastRenderedFormat().equals(settings.getFormat())) {
             ClockHud hud = new ClockHud(playerRef, settings.getPosition(), formatted);
-            hudManager.setCustomHud(playerRef, hud);
+            MultipleHUD multipleHUD = MultipleHUD.getInstance();
+            if (multipleHUD != null) {
+                multipleHUD.setCustomHud(player, playerRef, HUD_KEY, hud);
+            } else {
+                hudManager.setCustomHud(playerRef, hud);
+            }
             settings.setLastRenderedPosition(settings.getPosition());
             settings.setLastRenderedFormat(settings.getFormat());
             settings.setLastRenderedText(formatted);
@@ -82,7 +90,12 @@ public final class ClockTickSystem extends EntityTickingSystem<EntityStore> {
 
         if (!formatted.equals(settings.getLastRenderedText())) {
             ClockHud hud = new ClockHud(playerRef, settings.getPosition(), formatted);
-            hudManager.setCustomHud(playerRef, hud);
+            MultipleHUD multipleHUD = MultipleHUD.getInstance();
+            if (multipleHUD != null) {
+                multipleHUD.setCustomHud(player, playerRef, HUD_KEY, hud);
+            } else {
+                hudManager.setCustomHud(playerRef, hud);
+            }
             settings.setLastRenderedText(formatted);
         }
     }
