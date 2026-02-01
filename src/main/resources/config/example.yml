@@ -1,0 +1,5 @@
+# Example configuration for Bumenfeld Clock defaults.
+# The runtime config file uses capitalized keys.
+Format: "HH:mm"
+Position: "center"
+UpdateIntervalMs: 1000

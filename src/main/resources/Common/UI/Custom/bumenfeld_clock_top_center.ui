@@ -1,0 +1,10 @@
+Group {
+  Anchor: (Left: 0, Right: 0, Top: 0, Height: 120);
+  LayoutMode: Center;
+
+    Label #ClockLabel {
+      Anchor: (Left: 0, Right: 0, Top: 0, Bottom: 0);
+      Text: "00:00";
+      Style: (FontSize: 28, Alignment: Center, TextColor: #ffffff, RenderBold: true);
+    }
+}
