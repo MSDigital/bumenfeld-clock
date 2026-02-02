@@ -54,7 +54,7 @@ jobs:
           echo "CF_FILE_PATH=$JAR_PATH" >> "$GITHUB_ENV"
 
       - name: Upload to CurseForge
-        uses: itsmeow/curseforge-upload@latest
+        uses: itsmeow/curseforge-upload@v3.1.2
         with:
           token: ${{ secrets.CF_API_TOKEN }}
           project_id: "1452160"
