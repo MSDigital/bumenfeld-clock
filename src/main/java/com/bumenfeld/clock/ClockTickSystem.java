@@ -77,11 +77,10 @@ public final class ClockTickSystem extends EntityTickingSystem<EntityStore> {
             || !settings.getLastRenderedFormat().equals(settings.getFormat())) {
             ClockHud hud = new ClockHud(playerRef, settings.getPosition(), formatted);
             MultipleHUD multipleHUD = MultipleHUD.getInstance();
-            if (multipleHUD != null) {
-                multipleHUD.setCustomHud(player, playerRef, HUD_KEY, hud);
-            } else {
-                hudManager.setCustomHud(playerRef, hud);
+            if (multipleHUD == null) {
+                return;
             }
+            multipleHUD.setCustomHud(player, playerRef, HUD_KEY, hud);
             settings.setLastRenderedPosition(settings.getPosition());
             settings.setLastRenderedFormat(settings.getFormat());
             settings.setLastRenderedText(formatted);
@@ -89,13 +88,12 @@ public final class ClockTickSystem extends EntityTickingSystem<EntityStore> {
         }
 
         if (!formatted.equals(settings.getLastRenderedText())) {
-            ClockHud hud = new ClockHud(playerRef, settings.getPosition(), formatted);
             MultipleHUD multipleHUD = MultipleHUD.getInstance();
-            if (multipleHUD != null) {
-                multipleHUD.setCustomHud(player, playerRef, HUD_KEY, hud);
-            } else {
-                hudManager.setCustomHud(playerRef, hud);
+            if (multipleHUD == null) {
+                return;
             }
+            ClockHud hud = new ClockHud(playerRef, settings.getPosition(), formatted);
+            multipleHUD.setCustomHud(player, playerRef, HUD_KEY, hud);
             settings.setLastRenderedText(formatted);
         }
     }

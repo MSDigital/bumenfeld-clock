@@ -19,6 +19,9 @@ Bumenfeld Clock renders an in-game HUD clock for every player and lets them cust
 
 ## 2. Installation & configuration
 
+### Dependencies
+- Install the MultipleHUD dependency (`MultipleHUD-1.0.4.jar`) in `/mods/` so HUDs can be layered safely.
+
 ### Server setup
 1. Build the plugin with **Java 25 (Temurin 25)**:
    ```bash
@@ -41,9 +44,8 @@ UpdateIntervalMs: 1000    # tick update interval (minimum 200ms)
 - The default layout used is `bumenfeld_clock_top_center.ui`.
 
 ## 4. Build & release
-- `appJar` packages the plugin and, when `fatJar=true`, bundles runtime dependencies (toggle with `-PfatJar=false` for a thin jar).
-- `./gradlew build` compiles the code before producing the artifact; `./gradlew release` hooks into the release workflow that uploads artifacts to GitHub Releases.
-- Add `-PdeployOutputPath=/absolute/path/to/server/mods` to automatically copy the freshly built `/build/libs/*.jar` artifact to another location (the copy happens after `build`/`assemble`/`release` and skips when the property is absent).
+- Build the production jar with `./gradlew clean release`.
+- The output artifact is `build/libs/bumenfeld-clock-<version>.jar`.
 - Version metadata (ID/timestamp/commit) is injected during `processResources`, so release builds contain provenance.
 
 ## 5. Development notes
