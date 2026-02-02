@@ -1,5 +1,5 @@
 Group {
-  Anchor: (Left: 0, Right: 0, Top: 0, Height: 120);
+  Anchor: (Left: 0, Right: 0, Top: 0, Height: 130);
   LayoutMode: Center;
 
     Label #ClockLabel {

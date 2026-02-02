@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 public final class ClockHud extends CustomUIHud {
-
     private final ClockPosition position;
     private String currentText;
 
