@@ -46,13 +46,20 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
 
+      - name: Resolve release JAR path
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR_PATH="$(ls -1 build/libs/*.jar | head -n 1)"
+          echo "CF_FILE_PATH=$JAR_PATH" >> "$GITHUB_ENV"
+
       - name: Upload to CurseForge
         uses: itsmeow/curseforge-upload@v3
         with:
           token: ${{ secrets.CF_API_TOKEN }}
           project_id: "1452160"
           game_endpoint: "hytale"
-          file_path: "build/libs/*.jar"
+          file_path: ${{ env.CF_FILE_PATH }}
           game_versions: "14284"
           release_type: "release"
           changelog: ${{ github.event.release.body }}
