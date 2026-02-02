@@ -52,3 +52,7 @@ UpdateIntervalMs: 1000    # tick update interval (minimum 200ms)
 1. The plugin stores per-player settings as an entity component, seeded from the config defaults on first join.
 2. UI tweaks live only in the `.ui` files; no rebuild is needed if you edit them directly in the server asset pack.
 3. Keep the config defaults in sync with any UI/command changes so new players get sensible values.
+
+## 6. License
+Licensed under **MSDigital No-Resale License v1.0** (see `LICENSE`).
+**Attribution:** BlackJackV8 (MSDigital) — Official repo: <https://github.com/MSDigital/bumenfeld-clock>
