@@ -46,6 +46,18 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
 
+      - name: Upload to CurseForge
+        uses: itsmeow/curseforge-upload@v3
+        with:
+          token: ${{ secrets.CF_API_TOKEN }}
+          project_id: "1452160"
+          game_endpoint: "hytale"
+          file_path: "build/libs/*.jar"
+          game_versions: "14284"
+          release_type: "release"
+          changelog: ${{ github.event.release.body }}
+          changelog_type: "markdown"
+
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
