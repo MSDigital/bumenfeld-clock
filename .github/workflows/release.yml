@@ -93,10 +93,22 @@ jobs:
           }
           pathlib.Path("build/cf-metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
           PY
-          curl -sS -X POST "https://${CF_GAME_ENDPOINT}.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-file" \
+          HTTP_CODE="$(curl -sS --fail-with-body -o build/cf-upload-response.json -w "%{http_code}" \
+            -X POST "https://${CF_GAME_ENDPOINT}.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-file" \
             -H "X-Api-Token: $CF_API_TOKEN" \
             -F "metadata=@build/cf-metadata.json;type=application/json" \
-            -F "file=@${CF_ZIP_PATH}"
+            -F "file=@${CF_ZIP_PATH}")"
+          echo "CurseForge upload HTTP status: $HTTP_CODE"
+          echo "CurseForge upload response:"
+          cat build/cf-upload-response.json
+          python - <<'PY'
+          import json, pathlib, sys
+          data = json.loads(pathlib.Path("build/cf-upload-response.json").read_text(encoding="utf-8"))
+          if "id" not in data:
+              print("CurseForge upload did not return a file id.")
+              sys.exit(1)
+          print(f"CurseForge file id: {data['id']}")
+          PY
 
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
