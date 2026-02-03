@@ -93,17 +93,30 @@ jobs:
           }
           pathlib.Path("build/cf-metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
           PY
-          HTTP_CODE="$(curl -sS --fail-with-body -o build/cf-upload-response.json -w "%{http_code}" \
+          HTTP_CODE="$(curl -sS -L --fail-with-body \
+            -o build/cf-upload-response.json \
+            -D build/cf-upload-headers.txt \
+            -w "%{http_code}" \
             -X POST "https://${CF_GAME_ENDPOINT}.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-file" \
             -H "X-Api-Token: $CF_API_TOKEN" \
             -F "metadata=@build/cf-metadata.json;type=application/json" \
             -F "file=@${CF_ZIP_PATH}")"
           echo "CurseForge upload HTTP status: $HTTP_CODE"
+          echo "CurseForge upload response headers:"
+          cat build/cf-upload-headers.txt
           echo "CurseForge upload response:"
-          cat build/cf-upload-response.json
+          if [ -s build/cf-upload-response.json ]; then
+            cat build/cf-upload-response.json
+          else
+            echo "(empty response body)"
+          fi
           python - <<'PY'
           import json, pathlib, sys
-          data = json.loads(pathlib.Path("build/cf-upload-response.json").read_text(encoding="utf-8"))
+          text = pathlib.Path("build/cf-upload-response.json").read_text(encoding="utf-8")
+          if not text.strip():
+              print("CurseForge upload returned an empty response body.")
+              sys.exit(1)
+          data = json.loads(text)
           if "id" not in data:
               print("CurseForge upload did not return a file id.")
               sys.exit(1)
