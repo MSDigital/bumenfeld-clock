@@ -72,14 +72,6 @@ jobs:
               print("CF_RELATIONS_JSON=" + json.dumps(relations, separators=(",", ":")))
           PY
 
-      - name: Build CurseForge zip
-        shell: bash
-        run: |
-          set -euo pipefail
-          ZIP_PATH="build/libs/bumenfeld-clock-${{ github.ref_name }}.zip"
-          zip -j "$ZIP_PATH" "$CF_FILE_PATH" "LICENSE" "USAGE.md" "build/resources/main/manifest.json"
-          echo "CF_ZIP_PATH=$ZIP_PATH" >> "$GITHUB_ENV"
-
       - name: Upload to CurseForge (Upload API)
         shell: bash
         env:
@@ -110,7 +102,7 @@ jobs:
             -X POST "${CF_API_BASE_URL}/api/projects/${CF_PROJECT_ID}/upload-file" \
             -H "X-Api-Token: $CF_API_TOKEN" \
             -F "metadata=<build/cf-metadata.json;type=application/json" \
-            -F "file=@${CF_ZIP_PATH}")"
+            -F "file=@${CF_FILE_PATH}")"
           echo "CurseForge upload HTTP status: $HTTP_CODE"
           echo "CurseForge upload response headers:"
           cat build/cf-upload-headers.txt
