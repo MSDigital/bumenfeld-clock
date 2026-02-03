@@ -53,17 +53,50 @@ jobs:
           JAR_PATH="$(ls -1 build/libs/*.jar | head -n 1)"
           echo "CF_FILE_PATH=$JAR_PATH" >> "$GITHUB_ENV"
 
-      - name: Upload to CurseForge
-        uses: itsmeow/curseforge-upload@v3.1.2
-        with:
-          token: ${{ secrets.CF_API_TOKEN }}
-          project_id: "1452160"
-          game_endpoint: "hytale"
-          file_path: ${{ env.CF_FILE_PATH }}
-          game_versions: "14284"
-          release_type: "release"
-          changelog: ${{ github.event.release.body }}
-          changelog_type: "markdown"
+      - name: Load CurseForge config
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_ENV"
+          import json, pathlib
+          cfg = json.loads(pathlib.Path("curseforge.json").read_text(encoding="utf-8"))
+          print(f"CF_PROJECT_ID={cfg['projectId']}")
+          print(f"CF_GAME_ENDPOINT={cfg['gameEndpoint']}")
+          print(f"CF_RELEASE_TYPE={cfg.get('releaseType', 'release')}")
+          print(f"CF_CHANGELOG_TYPE={cfg.get('changelogType', 'markdown')}")
+          print("CF_GAME_VERSIONS=" + ",".join(str(v) for v in cfg["gameVersions"]))
+          PY
+
+      - name: Build CurseForge zip
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP_PATH="build/libs/bumenfeld-clock-${{ github.ref_name }}.zip"
+          zip -j "$ZIP_PATH" "$CF_FILE_PATH" "LICENSE" "USAGE.md"
+          echo "CF_ZIP_PATH=$ZIP_PATH" >> "$GITHUB_ENV"
+
+      - name: Upload to CurseForge (Upload API)
+        shell: bash
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CHANGELOG: ${{ github.event.release.body }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, pathlib
+          changelog = os.environ.get("CHANGELOG", "")
+          metadata = {
+              "changelog": changelog,
+              "changelogType": os.environ.get("CF_CHANGELOG_TYPE", "markdown"),
+              "gameVersions": [int(v) for v in os.environ["CF_GAME_VERSIONS"].split(",") if v],
+              "releaseType": os.environ.get("CF_RELEASE_TYPE", "release"),
+          }
+          pathlib.Path("build/cf-metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
+          PY
+          curl -sS -X POST "https://${CF_GAME_ENDPOINT}.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-file" \
+            -H "X-Api-Token: $CF_API_TOKEN" \
+            -F "metadata=@build/cf-metadata.json;type=application/json" \
+            -F "file=@${CF_ZIP_PATH}"
 
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
