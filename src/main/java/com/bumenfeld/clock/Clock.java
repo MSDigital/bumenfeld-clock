@@ -5,6 +5,8 @@ import com.bumenfeld.clock.ClockConfig;
 import com.bumenfeld.clock.PlayerClockSettings;
 import com.bumenfeld.clock.ClockTickSystem;
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.event.EventPriority;
+import com.hypixel.hytale.server.core.event.events.BootEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
@@ -22,6 +24,8 @@ public class Clock extends JavaPlugin {
 
     @Override
     public void setup() {
+        ExtractedAssetPackManifestEnsurer.ensure(this);
+        getEventRegistry().register(EventPriority.LAST, BootEvent.class, event -> ExtractedAssetPackManifestEnsurer.ensure(this));
         config.save();
         playerSettingsComponent = getEntityStoreRegistry()
             .registerComponent(PlayerClockSettings.class, "BumenfeldClockSettings", PlayerClockSettings.CODEC);
