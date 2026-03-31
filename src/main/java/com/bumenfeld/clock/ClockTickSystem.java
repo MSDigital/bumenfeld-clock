@@ -2,12 +2,10 @@ package com.bumenfeld.clock;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
-import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.buuz135.mhud.MultipleHUD;
-import com.hypixel.hytale.server.core.entity.EntityUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.HudManager;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
@@ -51,9 +49,8 @@ public final class ClockTickSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        Holder<EntityStore> holder = EntityUtils.toHolder(index, archetypeChunk);
-        Player player = holder.getComponent(Player.getComponentType());
-        PlayerRef playerRef = holder.getComponent(PlayerRef.getComponentType());
+        Player player = archetypeChunk.getComponent(index, Player.getComponentType());
+        PlayerRef playerRef = archetypeChunk.getComponent(index, PlayerRef.getComponentType());
         if (player == null || playerRef == null) {
             return;
         }
@@ -66,10 +63,10 @@ public final class ClockTickSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        PlayerClockSettings settings = holder.getComponent(settingsComponent);
+        PlayerClockSettings settings = archetypeChunk.getComponent(index, settingsComponent);
         if (settings == null) {
             settings = PlayerClockSettings.fromDefaults(config.get());
-            holder.putComponent(settingsComponent, settings);
+            commandBuffer.putComponent(archetypeChunk.getReferenceTo(index), settingsComponent, settings);
         }
 
         String formatted = formatTime(gameDateTime, settings);
