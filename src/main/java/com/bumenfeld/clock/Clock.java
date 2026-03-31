@@ -19,6 +19,7 @@ public class Clock extends JavaPlugin {
 
     public Clock(JavaPluginInit init) {
         super(init);
+        ExtractedAssetPackManifestEnsurer.ensure(this);
         this.config = withConfig("BumenfeldClock", ClockConfig.CODEC);
     }
 

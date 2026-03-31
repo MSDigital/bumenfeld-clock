@@ -31,16 +31,21 @@ final class ExtractedAssetPackManifestEnsurer {
             Files.createDirectories(dataDirectory);
             Path extractedManifest = dataDirectory.resolve("manifest.json");
             String extractedPackName = extractedPackName(pluginManifest.getName());
-            if (!shouldWriteExtractedManifest(extractedManifest, pluginManifest.getGroup(), pluginManifest.getName(), extractedPackName)) {
-                return;
-            }
-
             try (InputStream stream = plugin.getClass().getClassLoader().getResourceAsStream("manifest.json")) {
                 if (stream == null) {
                     return;
                 }
                 JsonNode root = MAPPER.readTree(stream);
                 if (!(root instanceof ObjectNode rootObject)) {
+                    return;
+                }
+                if (!shouldWriteExtractedManifest(
+                    extractedManifest,
+                    pluginManifest.getGroup(),
+                    pluginManifest.getName(),
+                    extractedPackName,
+                    rootObject
+                )) {
                     return;
                 }
 
@@ -55,17 +60,43 @@ final class ExtractedAssetPackManifestEnsurer {
         }
     }
 
-    private static boolean shouldWriteExtractedManifest(Path path, String pluginGroup, String pluginName, String extractedPackName) {
+    private static boolean shouldWriteExtractedManifest(
+        Path path,
+        String pluginGroup,
+        String pluginName,
+        String extractedPackName,
+        JsonNode bundledManifest
+    ) {
         if (!Files.exists(path)) {
             return true;
         }
 
         try {
             JsonNode root = MAPPER.readTree(path.toFile());
+            if (!(root instanceof ObjectNode)) {
+                return true;
+            }
             String group = root.path("Group").asText("");
             String name = root.path("Name").asText("");
 
             if (group.equals(pluginGroup) && name.equals(extractedPackName)) {
+                // Managed extracted manifest must keep IncludesAssetPack=false to avoid duplicate asset-pack registration.
+                if (root.path("IncludesAssetPack").asBoolean(true)) {
+                    return true;
+                }
+
+                String extractedBuildId = root.path("Build").path("Id").asText("");
+                String bundledBuildId = bundledManifest.path("Build").path("Id").asText("");
+                if (!bundledBuildId.isBlank() && !bundledBuildId.equals(extractedBuildId)) {
+                    return true;
+                }
+
+                String extractedServerVersion = root.path("ServerVersion").asText("");
+                String bundledServerVersion = bundledManifest.path("ServerVersion").asText("");
+                if (!bundledServerVersion.isBlank() && !bundledServerVersion.equals(extractedServerVersion)) {
+                    return true;
+                }
+
                 return false;
             }
             if (group.equals(pluginGroup) && name.equals(pluginName)) {

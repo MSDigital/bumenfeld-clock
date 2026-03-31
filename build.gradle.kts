@@ -3,7 +3,7 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.Copy
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.net.URL
+import java.net.URI
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -96,7 +96,7 @@ fun resolveServerVersion(raw: String?): String? {
 fun fetchLatestServerRelease(): String? {
     val metadataUrl = "https://maven.hytale.com/release/com/hypixel/hytale/Server/maven-metadata.xml"
     return try {
-        val xml = URL(metadataUrl).readText()
+        val xml = URI(metadataUrl).toURL().openStream().bufferedReader().use { it.readText() }
         Regex("<release>([^<]+)</release>").find(xml)?.groupValues?.get(1)
             ?: Regex("<latest>([^<]+)</latest>").find(xml)?.groupValues?.get(1)
     } catch (ex: IOException) {
